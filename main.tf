@@ -13,12 +13,25 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_instance" "web_server" {                            # BLOCK
-  ami           = data.aws_ami.ubuntu.id                          # Argument with data expression
-  instance_type = "t2.micro"                                      # Argument
-  subnet_id     = aws_subnet.public_subnets["public_subnet_1"].id # Argument with value as expression
+resource "aws_instance" "jenkins_web_server" {                            
+  ami           = "ami-08a52ddb321b32a8c"                          
+  instance_type = "t2.micro"                                      
+  
   tags = {
-    Name = "Web EC2 Server"
+    Name = "Jenkins Web Server"
   }
+  
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y 
+    sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+    sudo yum upgrade -y
+    sudo amazon-linux-extras install java-openjdk11 -y
+    yum install jenkins -y
+    systemctl enable jenkins
+    systemctl start jenkins
+    EOF
 }
 
