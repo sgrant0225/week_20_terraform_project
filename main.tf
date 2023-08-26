@@ -35,3 +35,30 @@ resource "aws_instance" "jenkins_web_server" {
     EOF
 }
 
+resource "aws_security_group" "jenkins_web_server_security_group" {
+  name        = "jenkins_web_server_security_group"
+  description = "Allow inbound traffic"
+  vpc_id      = "vpc-0b47b6adeff3753ef"
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    
+  }
+  
+  ingress {
+    from_port        = 8080
+    to_port          = 8080
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  
+}
+
+resource "aws_s3_bucket" "my_jenkins_s3_bucket" {
+  bucket = "my_jenkins_s3_bucket"
+}
+
