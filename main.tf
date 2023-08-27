@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 4.0"
     }
   }
 }
@@ -14,8 +14,11 @@ provider "aws" {
 }
 
 resource "aws_instance" "jenkins_web_server" {
-  ami           = "ami-08a52ddb321b32a8c"
-  instance_type = "t2.micro"
+  ami                         = "ami-051f7e7f6c2f40dc1"
+  instance_type               = "t2.micro"
+  key_name                    = "my_labs_key"
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.jenkins_web_server_security_group.id]
 
   tags = {
     Name = "Jenkins Web Server"
@@ -23,15 +26,15 @@ resource "aws_instance" "jenkins_web_server" {
 
   user_data = <<-EOF
     #!/bin/bash
-    yum update -y 
-    wget -O /etc/yum.repos.d/jenkins.repo \
+    sudo yum update -y 
+    sudo wget -O /etc/yum.repos.d/jenkins.repo \
     https://pkg.jenkins.io/redhat-stable/jenkins.repo
-    rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-    yum upgrade -y
-    amazon-linux-extras install java-openjdk11 -y
-    yum install jenkins -y
-    systemctl enable jenkins
-    systemctl start jenkins
+    sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+    sudo yum upgrade -y
+    sudo dnf install java-11-amazon-corretto -y
+    sudo yum install jenkins -y
+    sudo systemctl enable jenkins
+    sudo systemctl start jenkins
     EOF
 }
 
@@ -74,4 +77,6 @@ resource "aws_security_group" "jenkins_web_server_security_group" {
 resource "aws_s3_bucket" "myjenkinss3bucket" {
   bucket = "myjenkinss3bucket"
 }
+
+
 
